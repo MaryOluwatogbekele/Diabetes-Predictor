@@ -126,11 +126,17 @@ with col2:
             st.error("Based on your inputs, you may be at risk of diabetes. Please consult a healthcare professional.")
         
         # Create a risk meter visualization
-        risk_level = prediction_proba[0][1] * 100
+        #risk_level = prediction_proba[0][1] * 100
+        if prediction[0] == 0:
+            risk_level = prediction_proba[0][0] * 100
+        else:
+            risk_level = prediction_proba[0][1] * 100
         fig, ax = plt.subplots(figsize=(8, 2))
         ax.barh(['Risk Level'], [risk_level], color='#ef4444' if risk_level > 50 else '#10b981')
         ax.set_xlim(0, 100)
-        ax.set_title('Diabetes Risk Assessment')
+        #ax.set_title('Diabetes Risk Assessment')
+        label = 'Low Risk Probability' if prediction[0] == 0 else 'High Risk Probability'
+        ax.barh([label], [risk_level], color='#10b981' if prediction[0] == 0 else '#ef4444')
         ax.set_xlabel('Probability (%)')
         ax.grid(axis='x', linestyle='--', alpha=0.7)
         st.pyplot(fig)
@@ -166,3 +172,4 @@ Always consult with a healthcare provider for medical diagnosis.
 """)
 st.markdown("© 2025 Diabetes Prediction System | Developed with Streamlit")
 st.markdown('</div>', unsafe_allow_html=True)
+
