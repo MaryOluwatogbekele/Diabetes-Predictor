@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # --------------------------------------------------
-# Page configuration (MUST come before any st calls)
+# Page configuration (MUST be first Streamlit call)
 # --------------------------------------------------
 st.set_page_config(
     page_title="Diabetes Prediction System",
@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # --------------------------------------------------
-# Load model
+# Load trained model
 # --------------------------------------------------
 model = joblib.load("Best_Bagging_Model_For_Women_Diabetes_Risk_Prediction.pkl")
 
@@ -67,7 +67,7 @@ st.markdown(
 )
 
 # --------------------------------------------------
-# Header
+# Header & intro
 # --------------------------------------------------
 st.markdown(
     '<div class="header"><h1>🩺 Diabetes Prediction System</h1></div>',
@@ -77,7 +77,7 @@ st.markdown(
 st.markdown(
     """
     This application uses machine learning to predict diabetes risk based on
-    health metrics. Enter your information to receive a prediction.
+    health metrics. Enter your health information to receive a prediction.
     """
 )
 
@@ -110,7 +110,7 @@ with col1:
         submit_button = st.form_submit_button("Predict Diabetes Risk")
 
 # --------------------------------------------------
-# Prediction & visualization
+# Prediction results
 # --------------------------------------------------
 with col2:
     st.markdown("### Prediction Results")
@@ -122,40 +122,43 @@ with col2:
         )
 
         prediction = model.predict(input_data)[0]
-        proba = model.predict_proba(input_data)[0]
+        probabilities = model.predict_proba(input_data)[0]
 
         st.markdown('<div class="prediction-card">', unsafe_allow_html=True)
 
-        # -----------------------------
-        # Text result (CORRECT)
-        # -----------------------------
         if prediction == 0:
-            probability = proba[0] * 100
+            probability = probabilities[0] * 100
             label = "Low Diabetes Risk"
             color = "#10b981"
+
             st.markdown(
                 f'<h2 class="negative">Prediction: {label}</h2>',
                 unsafe_allow_html=True,
             )
-            st.markdown(f"<h3>Probability: {probability:.1f}%</h3>", unsafe_allow_html=True)
+            st.markdown(
+                f"<h3>Probability: {probability:.1f}%</h3>",
+                unsafe_allow_html=True,
+            )
             st.success("Based on your inputs, you have a low risk of diabetes.")
         else:
-            probability = proba[1] * 100
+            probability = probabilities[1] * 100
             label = "High Diabetes Risk"
             color = "#ef4444"
+
             st.markdown(
                 f'<h2 class="positive">Prediction: {label}</h2>',
                 unsafe_allow_html=True,
             )
-            st.markdown(f"<h3>Probability: {probability:.1f}%</h3>", unsafe_allow_html=True)
+            st.markdown(
+                f"<h3>Probability: {probability:.1f}%</h3>",
+                unsafe_allow_html=True,
+            )
             st.error(
                 "Based on your inputs, you may be at risk of diabetes. "
                 "Please consult a healthcare professional."
             )
 
-        # -----------------------------
-        # SINGLE, consistent bar chart
-        # -----------------------------
+        # Risk probability bar (single, consistent)
         fig, ax = plt.subplots(figsize=(8, 2))
         ax.barh([label], [probability], color=color)
         ax.set_xlim(0, 100)
@@ -166,9 +169,7 @@ with col2:
 
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # -----------------------------
-        # Feature importance (safe)
-        # -----------------------------
+        # Feature importance (if supported)
         if hasattr(model, "feature_importances_"):
             st.markdown("### Feature Importance")
             features = [
@@ -179,7 +180,7 @@ with col2:
 
             fig, ax = plt.subplots(figsize=(10, 6))
             sns.barplot(x=importance, y=features, ax=ax)
-            ax.set_title("Feature Importance")
+            ax.set_title("Feature Importance in Prediction")
             ax.set_xlabel("Importance Score")
             st.pyplot(fig)
 
@@ -188,6 +189,11 @@ with col2:
             "Please enter your health information and click "
             "'Predict Diabetes Risk' to see results."
         )
+        st.image(
+            "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7"
+            "?auto=format&fit=crop&w=600&h=400",
+            caption="Diabetes Risk Assessment"
+        )
 
 # --------------------------------------------------
 # Footer
@@ -195,8 +201,8 @@ with col2:
 st.markdown('<div class="footer">', unsafe_allow_html=True)
 st.markdown(
     """
-    **Note:** This prediction is based on machine learning and does not replace
-    professional medical advice. Always consult a healthcare provider.
+    **Note:** This prediction is based on machine learning algorithms and does not
+    replace professional medical advice. Always consult a healthcare provider.
     """
 )
 st.markdown("© 2025 Diabetes Prediction System | Developed with Streamlit")
